@@ -21,7 +21,7 @@ function loadQuotes() {
 // Initial Setup
 // ============================
 let quotes = loadQuotes();
-saveQuotes(); // Ensure it's saved at least once
+saveQuotes();
 
 // ============================
 // DOM Elements
@@ -41,6 +41,7 @@ const importInput = document.createElement('input');
 importInput.type = 'file';
 importInput.accept = '.json';
 importInput.style.marginTop = '10px';
+importInput.id = 'importFile';
 importInput.onchange = importFromJsonFile;
 
 app.appendChild(quoteDisplay);
@@ -181,6 +182,7 @@ formBtn.onclick = createAddQuoteForm;
 
 const exportBtn = document.createElement('button');
 exportBtn.textContent = 'Export to JSON';
+exportBtn.id = 'exportQuotesBtn';
 exportBtn.onclick = exportToJsonFile;
 
 buttonsContainer.appendChild(randomBtn);
@@ -191,3 +193,38 @@ buttonsContainer.appendChild(exportBtn);
 // Initialization
 // ============================
 showLastViewedQuote();
+
+// ============================
+// Feature Checks (Console Warnings)
+// ============================
+console.log('--- Feature Check ---');
+
+// 1. Check export quotes button
+const exportCheck = document.getElementById('exportQuotesBtn');
+if (exportCheck) {
+  console.log('✅ Export quotes button found.');
+} else {
+  console.warn('❌ Export quotes button not found!');
+}
+
+// 2. Check exportToJsonFile function
+if (typeof exportToJsonFile === 'function') {
+  console.log('✅ exportToJsonFile function exists.');
+} else {
+  console.warn('❌ exportToJsonFile function is missing!');
+}
+
+// 3. Check import quotes file input
+const importCheck = document.getElementById('importFile');
+if (importCheck) {
+  console.log('✅ Import file input found.');
+} else {
+  console.warn('❌ Import file input not found!');
+}
+
+// 4. Check importFromJsonFile function
+if (typeof importFromJsonFile === 'function') {
+  console.log('✅ importFromJsonFile function exists.');
+} else {
+  console.warn('❌ importFromJsonFile function is missing!');
+}
