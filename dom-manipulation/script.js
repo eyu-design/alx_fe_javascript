@@ -137,4 +137,57 @@ function importFromJsonFile(event) {
   fileReader.onload = function (e) {
     try {
       const importedQuotes = JSON.parse(e.target.result);
-      if (!Array.isArray(importedQuotes)) throw new Error("Inva
+      if (!Array.isArray(importedQuotes)) throw new Error("Invalid file format.");
+
+      importedQuotes.forEach(q => {
+        if (q.text && q.category) {
+          quotes.push({ text: q.text, category: q.category });
+        }
+      });
+
+      saveQuotes();
+      alert('Quotes imported successfully!');
+      showRandomQuote();
+    } catch (err) {
+      alert("Failed to import quotes: " + err.message);
+    }
+  };
+  fileReader.readAsText(file);
+}
+
+function showLastViewedQuote() {
+  const last = sessionStorage.getItem(SESSION_STORAGE_KEY);
+  if (last) {
+    const quote = JSON.parse(last);
+    quoteDisplay.innerHTML = `
+      <blockquote>"${quote.text}"</blockquote>
+      <small>Category: ${quote.category} (Last viewed)</small>
+    `;
+  } else {
+    showRandomQuote();
+  }
+}
+
+// ============================
+// Buttons
+// ============================
+const randomBtn = document.createElement('button');
+randomBtn.textContent = 'Show Random Quote';
+randomBtn.onclick = showRandomQuote;
+
+const formBtn = document.createElement('button');
+formBtn.textContent = 'Add New Quote';
+formBtn.onclick = createAddQuoteForm;
+
+const exportBtn = document.createElement('button');
+exportBtn.textContent = 'Export to JSON';
+exportBtn.onclick = exportToJsonFile;
+
+buttonsContainer.appendChild(randomBtn);
+buttonsContainer.appendChild(formBtn);
+buttonsContainer.appendChild(exportBtn);
+
+// ============================
+// Initialization
+// ============================
+showLastViewedQuote();
