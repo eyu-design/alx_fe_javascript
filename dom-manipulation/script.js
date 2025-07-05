@@ -305,3 +305,58 @@ buttonsContainer.appendChild(exportBtn);
 // Initialization
 // ============================
 showLastViewedQuote();
+
+const exportBtn = document.createElement('button');
+exportBtn.textContent = 'Export to JSON';
+exportBtn.onclick = exportToJsonFile;
+buttonsContainer.appendChild(exportBtn);
+function exportToJsonFile() {
+  const jsonStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'quotes.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+const importInput = document.createElement('input');
+importInput.type = 'file';
+importInput.accept = '.json';
+importInput.style.marginTop = '10px';
+importInput.onchange = importFromJsonFile;
+
+const importInput = document.createElement('input');
+importInput.type = 'file';
+importInput.accept = '.json';
+importInput.style.marginTop = '10px';
+importInput.onchange = importFromJsonFile;
+app.appendChild(importInput);
+function importFromJsonFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const fileReader = new FileReader();
+  fileReader.onload = function (e) {
+    try {
+      const importedQuotes = JSON.parse(e.target.result);
+      if (!Array.isArray(importedQuotes)) throw new Error("Invalid file format.");
+
+      importedQuotes.forEach(q => {
+        if (q.text && q.category) {
+          quotes.push({ text: q.text, category: q.category });
+        }
+      });
+
+      saveQuotes();
+      alert('Quotes imported successfully!');
+      showRandomQuote();
+    } catch (err) {
+      alert("Failed to import quotes: " + err.message);
+    }
+  };
+  fileReader.readAsText(file);
+}
