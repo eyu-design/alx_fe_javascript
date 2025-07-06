@@ -317,3 +317,82 @@ populateCategories(); // Initial dropdown setup
 showLastViewedQuote();
 categoryFilter.addEventListener('change', filterQuotes);
 populateCategories();
+const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts'; // Simulated endpoint
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverData = await response.json();
+
+    // Simulate quote structure
+    const serverQuotes = serverData.slice(0, 5).map(post => ({
+      text: post.title,
+      category: 'Server'
+    }));
+
+    return serverQuotes;
+  } catch (error) {
+    console.error('Error fetching from server:', error);
+    return [];
+  }
+}
+async function pushLocalQuotesToServer() {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(quotes),
+    });
+
+    const result = await response.json();
+    console.log('Pushed to server:', result);
+  } catch (error) {
+    console.error('Error pushing to server:', error);
+  }
+}
+function mergeQuotes(serverQuotes) {
+  const merged = [...quotes];
+
+  serverQuotes.forEach(serverQuote => {
+    const exists = quotes.some(
+      q => q.text === serverQuote.text && q.category === serverQuote.category
+    );
+    if (!exists) {
+      merged.push(serverQuote);
+      showNotification('New quote added from server: "' + serverQuote.text + '"');
+    }
+  });
+
+  quotes = merged;
+  saveQuotes();
+  populateCategories();
+  filterQuotes();
+}
+async function syncWithServer() {
+  const serverQuotes = await fetchQuotesFromServer();
+  mergeQuotes(serverQuotes);
+}
+const notificationBox = document.createElement('div');
+notificationBox.id = 'notificationBox';
+notificationBox.style.color = 'white';
+notificationBox.style.background = 'darkorange';
+notificationBox.style.padding = '10px';
+notificationBox.style.marginTop = '10px';
+notificationBox.style.display = 'none';
+app.insertBefore(notificationBox, quoteDisplay);
+function showNotification(message) {
+  notificationBox.textContent = message;
+  notificationBox.style.display = 'block';
+  setTimeout(() => {
+    notificationBox.style.display = 'none';
+  }, 5000);
+}
+syncWithServer(); // Run on load
+
+// Auto-sync every 30 seconds
+setInterval(syncWithServer, 30000);
+showLastViewedQuote();
+populateCategories();
+filterQuotes();
+categoryFilter.addEventListener('change', filterQuotes);
+syncWithServer();
+setInterval(syncWithServer, 30000);
