@@ -276,6 +276,8 @@ async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
   mergeQuotes(serverQuotes);
   pushLocalQuotesToServer();
+  showNotification("Quotes synced with server!");
+
 }
 
 // ============================
