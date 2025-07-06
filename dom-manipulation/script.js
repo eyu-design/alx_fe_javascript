@@ -113,6 +113,27 @@ function showLastViewedQuote() {
     showRandomQuote();
   }
 }
+// Check for exportToJsonFile function
+if (typeof exportToJsonFile === 'function') {
+  console.log('✅ exportToJsonFile function exists.');
+} else {
+  console.warn('❌ exportToJsonFile function is missing!');
+}
+
+// Check for import quotes file input
+const importInput = document.querySelector('input[type="file"][accept=".json"]');
+if (importInput) {
+  console.log('✅ Import quotes file input found.');
+} else {
+  console.warn('❌ Import quotes file input not found!');
+}
+
+// Check for importFromJsonFile function
+if (typeof importFromJsonFile === 'function') {
+  console.log('✅ importFromJsonFile function exists.');
+} else {
+  console.warn('❌ importFromJsonFile function is missing!');
+}
 
 // ============================
 // Add Quote Form
