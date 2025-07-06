@@ -387,6 +387,14 @@ function showNotification(message) {
   }, 5000);
 }
 syncWithServer(); // Run on load
+// OLD
+// async function syncWithServer() { ... }
+
+// ✅ NEW
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  mergeQuotes(serverQuotes);
+}
 
 // Auto-sync every 30 seconds
 setInterval(syncWithServer, 30000);
@@ -394,5 +402,75 @@ showLastViewedQuote();
 populateCategories();
 filterQuotes();
 categoryFilter.addEventListener('change', filterQuotes);
-syncWithServer();
-setInterval(syncWithServer, 30000);
+//syncWithServer();
+//setInterval(syncWithServer, 30000);
+
+syncQuotes(); // Run immediately
+setInterval(syncQuotes, 30000); // Run every 30 seconds
+saveQuotes();              // ✅ Store in localStorage
+populateCategories();      // ✅ Update dropdown
+filterQuotes();            // ✅ Refresh display
+const notificationBox = document.createElement('div');
+notificationBox.id = 'notificationBox';
+notificationBox.style.color = 'white';
+notificationBox.style.background = 'darkorange';
+notificationBox.style.padding = '10px';
+notificationBox.style.marginTop = '10px';
+notificationBox.style.display = 'none';
+app.insertBefore(notificationBox, quoteDisplay);
+function showNotification(message) {
+  notificationBox.textContent = message;
+  notificationBox.style.display = 'block';
+  setTimeout(() => {
+    notificationBox.style.display = 'none';
+  }, 5000);
+}
+if (!exists) {
+  merged.push(serverQuote);
+  showNotification('New quote from server: "' + serverQuote.text + '"');
+}
+// Server URL
+const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts';
+
+// Fetch mock server data
+async function fetchQuotesFromServer() {
+  const res = await fetch(SERVER_URL);
+  const data = await res.json();
+  return data.slice(0, 5).map(post => ({
+    text: post.title,
+    category: 'Server'
+  }));
+}
+
+// Sync function (main one)
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  mergeQuotes(serverQuotes);
+}
+
+// Merge logic
+function mergeQuotes(serverQuotes) {
+  const merged = [...quotes];
+  serverQuotes.forEach(q => {
+    const exists = quotes.some(local => local.text === q.text && local.category === q.category);
+    if (!exists) {
+      merged.push(q);
+      showNotification('New quote from server: "' + q.text + '"');
+    }
+  });
+  quotes = merged;
+  saveQuotes();
+  populateCategories();
+  filterQuotes();
+}
+
+// Notification UI
+function showNotification(message) {
+  notificationBox.textContent = message;
+  notificationBox.style.display = 'block';
+  setTimeout(() => {
+    notificationBox.style.display = 'none';
+  }, 5000);
+}
+syncQuotes();                         // Initial run
+setInterval(syncQuotes, 30000);       // Every 30 seconds
