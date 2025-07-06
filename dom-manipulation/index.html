@@ -11,5 +11,11 @@
     <button id="newQuote">Show New Quote</button>
     <div id="app"></div>
     <script src="script.js"></script>
+      <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+
+        <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+    <!-- Dynamically populated categories -->
+  </select>
   </body>
   </html>

@@ -228,3 +228,92 @@ if (typeof importFromJsonFile === 'function') {
 } else {
   console.warn('❌ importFromJsonFile function is missing!');
 }
+
+  function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+      const importedQuotes = JSON.parse(event.target.result);
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      alert('Quotes imported successfully!');
+    };
+    fileReader.readAsText(event.target.files[0]);
+  }
+  // ============ CATEGORY DROPDOWN SETUP ============
+const categoryFilter = document.createElement('select');
+categoryFilter.id = 'categoryFilter';
+categoryFilter.style.marginBottom = '20px';
+
+const defaultOption = document.createElement('option');
+defaultOption.value = '';
+defaultOption.textContent = 'All Categories';
+categoryFilter.appendChild(defaultOption);
+
+app.insertBefore(categoryFilter, quoteDisplay);
+
+// LocalStorage Key for filter
+const CATEGORY_FILTER_KEY = 'lastSelectedCategory';
+function populateCategories() {
+  // Get unique categories
+  const categories = [...new Set(quotes.map(q => q.category))];
+
+  // Clear old options (except "All Categories")
+  while (categoryFilter.options.length > 1) {
+    categoryFilter.remove(1);
+  }
+
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option);
+  }
+
+  );
+
+  // Restore saved filter (if any)
+  const savedFilter = localStorage.getItem(CATEGORY_FILTER_KEY);
+  if (savedFilter && categories.includes(savedFilter)) {
+    categoryFilter.value = savedFilter;
+    filterQuotes(); // Auto-filter
+  }
+}
+function filterQuotes() {
+  const selectedCategory = categoryFilter.value;
+  localStorage.setItem(CATEGORY_FILTER_KEY, selectedCategory);
+
+  let filtered = quotes;
+  if (selectedCategory) {
+    filtered = quotes.filter(q => q.category === selectedCategory);
+  }
+
+  if (filtered.length === 0) {
+    quoteDisplay.textContent = "No quotes available for this category.";
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filtered.length);
+  const quote = filtered[randomIndex];
+
+  quoteDisplay.innerHTML = `
+    <blockquote>"${quote.text}"</blockquote>
+    <small>Category: ${quote.category}</small>
+  `;
+
+  sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(quote));
+}
+
+if (newQuote.text && newQuote.category) {
+  quotes.push(newQuote);
+  saveQuotes();
+  populateCategories(); // 👈 New: refresh dropdown
+  alert('Quote added successfully!');
+  form.reset();
+  showRandomQuote();
+}
+categoryFilter.addEventListener('change', filterQuotes);
+populateCategories(); // Initial dropdown setup
+
+showLastViewedQuote();
+categoryFilter.addEventListener('change', filterQuotes);
+populateCategories();
